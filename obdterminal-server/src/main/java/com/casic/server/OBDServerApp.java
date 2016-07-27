@@ -5,16 +5,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Timer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.casic.utils.SystemConstants;
 
 public class OBDServerApp {
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(OBDServerApp.class);
+	private final static Logger LOGGER = Logger.getLogger(OBDServerApp.class);
 
 	public static void main(String[] args) throws IOException {
 		OBDDataQueue queue = OBDDataQueue.getInstance();

@@ -18,8 +18,7 @@ import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
 public class OBDDataDecoderCZPASATImpl extends CumulativeProtocolDecoder {
-	private static Logger logger = Logger.getLogger(OBDDataDecoderCZPASATImpl.class);
-	private static Logger logger2 = Logger.getLogger("OBDDataDecoder");
+	private static Logger LOGGER = Logger.getLogger(OBDDataDecoderCZPASATImpl.class);
 	private static final int PACKAGE_LENGTH = 490;
 	protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
 		int rcvCnt = ((Integer) session.getAttribute("RcvCount")).intValue();
@@ -34,13 +33,13 @@ public class OBDDataDecoderCZPASATImpl extends CumulativeProtocolDecoder {
 
 		byte[] data = new byte[in.limit()];
 		in.get(data);
-		logger.info("++++成功接收到第" + rcvCnt + "条数据，长度为:" + data.length + " ++++");
+		LOGGER.info("++++成功接收到第" + rcvCnt + "条数据，长度为:" + data.length + " ++++");
 
 		byte[] historydata = (byte[]) session.getAttribute("HistoryData");
 
 		data = byteMerger(new byte[][] { historydata, data });
 		if (historydata.length != 0) {
-			logger.info("+++成功拼接数据包++++!");
+			LOGGER.info("+++成功拼接数据包++++!");
 		}
 		byte[] decodeData = new byte[PACKAGE_LENGTH];
 		List<byte[]> ls = new ArrayList<byte[]>();
@@ -151,16 +150,16 @@ public class OBDDataDecoderCZPASATImpl extends CumulativeProtocolDecoder {
 				int cnt = ((Integer) session.getAttribute("DecodeCount")).intValue();
 				cnt++;
 				session.setAttribute("DecodeCount", Integer.valueOf(cnt));
-				logger2.info(" ++++ 成功解析了第 " + cnt + " 条数据，终端编号：" + terminalId + " ++++");
+				LOGGER.info(" ++++ 成功解析了第 " + cnt + " 条数据，终端编号：" + terminalId + " ++++");
 			} catch (Exception ex) {
 				String terminalId = session.getAttribute("terminalId").toString();
-				logger2.info(" ---- 无法解析正常数据包（包头正确），终端编号：" + terminalId + " ----");
-				logger2.info("数据包原始数据：" + bytes2HexString(data));
+				LOGGER.error(" ---- 无法解析正常数据包（包头正确），终端编号：" + terminalId + " ----");
+				LOGGER.error("数据包原始数据：" + bytes2HexString(data));
 				packetChanged = (OBDDataChanged[]) null;
 			}
 		} else {
-			logger2.info(" ---- 无法解析异常数据包（包头错误）----");
-			logger2.info(bytes2HexString(data));
+			LOGGER.error(" ---- 无法解析异常数据包（包头错误）----");
+			LOGGER.error(bytes2HexString(data));
 			packetChanged = (OBDDataChanged[]) null;
 		}
 		return packetChanged;

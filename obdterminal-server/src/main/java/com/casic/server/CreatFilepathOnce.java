@@ -5,15 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.log4j.Logger;
 import com.casic.utils.SystemConstants;
 
 public class CreatFilepathOnce {
-	private final static Logger LOGGER = LoggerFactory.getLogger(CreatFilepathOnce.class);
-	public void creat() {
+	private final static Logger LOGGER = Logger.getLogger(OBDServerApp.class);	public void creat() {
 		String filePath =SystemConstants.RT_DATAPATH;
 		String filePathHis = SystemConstants.HIS_DATAPATH;
 		SimpleDateFormat fT = new SimpleDateFormat("yyyyMMdd");
