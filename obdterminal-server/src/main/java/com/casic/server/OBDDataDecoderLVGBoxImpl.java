@@ -82,11 +82,11 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		String header = new String(c);
 		if ((header.equals("flsh")) || (header.equals("scan"))) {
 			try {
-				c = byteSplit(data, 4, 6);
+				c = byteSplit(data, 4, 12);
 
 				String terminalId = new String(c);//截取miei
 				session.setAttribute("terminalId", terminalId);
-				c = byteSplit(data, 10, 12);//截取time
+				c = byteSplit(data, 16, 6);//截取time
 
 				SimpleDateFormat formatTime = new SimpleDateFormat("HHmmssddMMyy");
 				String timeString = new String(c);
@@ -113,7 +113,6 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 					Date date = formatTime.parse(timeString);
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(date);
-					calendar.add(10, 8);
 					calendar.add(13, i);
 					packetChanged[i].setGPS_TIME(calendar.getTime());
 
@@ -184,7 +183,7 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		d = byteSplit(data, 22 + 11 * num + 5, 1);
 		obddata.setBackOxgenSensorVal(byteArrayToInt(d, 1));
 		d = byteSplit(data, 22 + 11 * num + 6, 1);
-		obddata.setAirConditionerStatus(byteArrayToInt(d, 1) - 40);
+		obddata.setAirConditionerStatus(byteArrayToInt(d, 1));
 		d = byteSplit(data, 22 + 11 * num + 7, 4);
 		obddata.setOilVal(byteArrayToInt(d, 4));
 		return obddata;
@@ -210,21 +209,20 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		d = byteSplit(data, 235 + 17 * num + 7, 2);
 		int long2 = byteArrayToInt(d, 2);
 
-		//double ln = long1 / 100 + (long1 % 100.0D + long2 / 10000.0D) / 60.0D;
 		double ln = (long1 *10000+long2)/1000000.0D;
 		bddata.setLongitude(Double.valueOf(df.format(ln)).doubleValue());
 
-		d = byteSplit(data, 235 + 17 * num + 9, 4);
-		int speed1 = byteArrayToInt(d, 4);
-		//d = byteSplit(data, 235 + 17 * num + 11, 2);
-		//int speed2 = byteArrayToInt(d, 2);
-		bddata.setBdspeed((speed1  / 1000000.0D) );
+		d = byteSplit(data, 235 + 17 * num + 9, 2);
+		int speed1 = byteArrayToInt(d, 2);
+		d = byteSplit(data, 235 + 17 * num + 11, 2);
+		int speed2 = byteArrayToInt(d, 2);
+		bddata.setBdspeed((speed1 *1000+speed2) / 1000.0D);
 
-		d = byteSplit(data, 235 + 17 * num + 13, 4);
-		//int bear1 = byteArrayToInt(d, 2);
-		//d = byteSplit(data, 235 + 17 * num + 15, 2);
-		int bear2 = byteArrayToInt(d, 4);
-		bddata.setBearing(bear2 / 10000000.0D);
+		d = byteSplit(data, 235 + 17 * num + 13, 2);
+		int bear1 = byteArrayToInt(d, 2);
+		d = byteSplit(data, 235 + 17 * num + 15, 2);
+		int bear2 = byteArrayToInt(d, 2);
+		bddata.setBearing((bear1*1000+bear2) / 1000.0D);
 
 		return bddata;
 	}
