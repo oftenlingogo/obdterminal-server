@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import com.casic.utils.SystemConstants;
 
 public class CreatFilepathDailyThread extends TimerTask {
-	// 荆长林
+	// LOGGER 注释2
 	private final static Logger LOGGER = Logger.getLogger(OBDServerApp.class);
 	public void run() {
 		String filePath =SystemConstants.RT_DATAPATH;
