@@ -18,6 +18,7 @@ public class OBDServerApp {
 		OBDDataQueue queue = OBDDataQueue.getInstance();
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext ct = new ClassPathXmlApplicationContext("conf/applicationContext-mina.xml");
+		
 		LOGGER.debug(ct.toString());
 		LOGGER.info("Server started,Listening Port : "+SystemConstants.PORT);
 

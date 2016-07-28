@@ -6,7 +6,7 @@
     <bean id="systemConstants" class="com.casic.utils.SystemConstants" />
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
         <property name="location">  
-            <value>conf/config.properties</value>  
+            <value>classpath:conf/config.properties</value>  
         </property>  
         <property name="fileEncoding" value="utf-8" />   
     </bean>  
