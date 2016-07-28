@@ -20,11 +20,15 @@ public class SaveDataThreadNew implements Runnable {
 	private String filePath = null;
 	private String pathHis = null;
 	private String pathIn = null;
+	
+	private SimpleDateFormat formatDate = new SimpleDateFormat("yyyyMMddHHmmss");
+	private SimpleDateFormat fT = new SimpleDateFormat("yyyyMMdd");
+	private SimpleDateFormat fT1 = new SimpleDateFormat("yyyyMMddHH");
+	private SimpleDateFormat fT2 = new SimpleDateFormat("yyyyMMddHHmm");
 
 	private static Logger logger = Logger.getLogger(SaveDataThreadNew.class);
 
 	public SaveDataThreadNew(OBDDataQueue queue) {
-
 
 		this.path = SystemConstants.RT_DATAPATH;
 		this.pathHis = SystemConstants.HIS_DATAPATH;
@@ -32,25 +36,31 @@ public class SaveDataThreadNew implements Runnable {
 	}
 
 	public void run() {
-		for (int i = 0; i < this.queue.getLength(); i++) {
-			OBDDataChanged[] data = this.queue.get();
-			if (savefile(data).booleanValue())
-				logger.info("++++ 成功存储数据 ++++");
-			else {
-				logger.info("---- 存储数据失败 ----");
+		while (true) {
+			try {
+				Thread.sleep(10000L);
+				if (this.queue.getLength() > 0) {
+					for (int i = 0; i < this.queue.getLength(); i++) {
+						OBDDataChanged[] data = this.queue.get();
+						String txt = data[0].getIMEI()+"_"+formatDate.format(data[0].getGPS_TIME())+".txt";
+						if (savefile(data).booleanValue())
+							logger.info(" +++ 成功存储数据: "+txt);
+						else {
+							logger.info(" !!! 数据存储失败： "+txt);
+						}
+					}
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
+
 	}
 
 	@SuppressWarnings("deprecation")
 	private Boolean savefile(OBDDataChanged[] data) {
 		JsonConfig jsonConfig = new JsonConfig();
 		jsonConfig.registerJsonValueProcessor(Date.class, new JsonDateValueProcessor());
-
-		SimpleDateFormat formatDate = new SimpleDateFormat("yyyyMMddHHmmss");
-		SimpleDateFormat fT = new SimpleDateFormat("yyyyMMdd");
-		SimpleDateFormat fT1 = new SimpleDateFormat("yyyyMMddHH");
-		SimpleDateFormat fT2 = new SimpleDateFormat("yyyyMMddHHmm");
 
 		if (new Date().getTime() - data[0].getGPS_TIME().getTime() < 300000L)
 			this.filePath = this.path;
@@ -60,11 +70,11 @@ public class SaveDataThreadNew implements Runnable {
 		if (data[0].getGPS_TIME().getSeconds() < 30) {
 			this.pathIn = (this.filePath + "/" + fT.format(data[0].getGPS_TIME()) + "/"
 					+ fT1.format(data[0].getGPS_TIME()) + "/" + fT2.format(data[0].getGPS_TIME()) + "00/");
-			
+
 		} else {
 			this.pathIn = (this.filePath + "/" + fT.format(data[0].getGPS_TIME()) + "/"
 					+ fT1.format(data[0].getGPS_TIME()) + "/" + fT2.format(data[0].getGPS_TIME()) + "30/");
-			
+
 		}
 
 		String filename = this.pathIn + data[0].getIMEI() + "_" + formatDate.format(data[0].getGPS_TIME()) + ".txt";
@@ -94,5 +104,4 @@ public class SaveDataThreadNew implements Runnable {
 		return Boolean.valueOf(false);
 	}
 
-	
 }

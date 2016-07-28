@@ -29,7 +29,7 @@
 		<property name="reuseAddress" value="true" />
 
 	</bean>
-	<bean id="decoder" class="com.casic.server.OBDDataDecoderCZPASATImpl"></bean>
+	<bean id="decoder" class="com.casic.server.OBDDataDecoderLVGBoxImpl"></bean>
 	<bean id="executorFilter" class="org.apache.mina.filter.executor.ExecutorFilter" />
 	<bean id="mdcInjectionFilter" class="org.apache.mina.filter.logging.MdcInjectionFilter">
 		<constructor-arg value="remoteAddress" />

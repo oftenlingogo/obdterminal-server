@@ -49,7 +49,6 @@ public class CreatFilepathDailyThread extends TimerTask {
 				myFilePathHis.mkdirs();
 			}
 		}
-
 		LOGGER.info("++++ 成功创建完成今日文件夹 ++++");
 	}
 
