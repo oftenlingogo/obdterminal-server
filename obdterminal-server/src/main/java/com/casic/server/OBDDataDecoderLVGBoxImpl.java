@@ -28,6 +28,7 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 	private static Logger logger = Logger.getLogger(OBDDataDecoderLVGBoxImpl.class);
 	private static Logger logger2 = Logger.getLogger("OBDDataDecoder");
 	private static final int PACKAGE_LENGTH = 490;
+	private SimpleDateFormat formatTime = new SimpleDateFormat("HHmmssddMMyy");
 	protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
 		int rcvCnt = ((Integer) session.getAttribute("RcvCount")).intValue();
 		int decCnt = ((Integer) session.getAttribute("DecodeCount")).intValue();
@@ -78,18 +79,16 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		OBDDataChanged[] packetChanged = new OBDDataChanged[30];
 		byte[] c = new byte[4];
 		c = byteSplit(data, 0, 4);//截取header
-		logger2.info("待解析数据："+bytes2HexString(data));
+		logger2.debug("待解析数据："+bytes2HexString(data));
 		String header = new String(c);
 		if ((header.equals("flsh")) || (header.equals("scan"))) {
 			try {
 				c = byteSplit(data, 4, 12);
-
+				String timeString = new String(c);
+			
+				c = byteSplit(data, 16, 6);//截取time
 				String terminalId = new String(c);//截取miei
 				session.setAttribute("terminalId", terminalId);
-				c = byteSplit(data, 16, 6);//截取time
-
-				SimpleDateFormat formatTime = new SimpleDateFormat("HHmmssddMMyy");
-				String timeString = new String(c);
 
 				ObdTenSecondData[] obd10data = new ObdTenSecondData[3];//截取10s obddata
 				for (int i = 0; i < 3; i++) {
@@ -152,7 +151,7 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 								(bddata[((i - 1) / 2)].getBearing() + bddata[((i + 1) / 2)].getBearing()) / 2.0D);
 					}
 					
-					logger2.info("解析后数据："+packetChanged[i]);
+					logger2.debug("解析后数据："+packetChanged[i]);
 				}
 
 				int cnt = ((Integer) session.getAttribute("DecodeCount")).intValue();
