@@ -4,22 +4,22 @@ import java.util.Date;
 
 public class OBDDataChanged {
 	private String IMEI;
-	private int bdoneNo_after_mileage;
-	private int bdoneNo_zero_mileage;
-	private int front_oxygen_sensor;
-	private int after_oxygen_sensor;
+	private int bdoneNo_after_mileage=0;
+	private int bdoneNo_zero_mileage=0;
+	private int front_oxygen_sensor=0;
+	private int after_oxygen_sensor=0;
 	private Date GPS_TIME;
 	private String GPS_STATE;
-	private double GPS_LAT;
-	private double GPS_LONG;
-	private double GPS_SPEED;
-	private double direction_angle;
-	private int instant_fuel;
-	private int db_speed;
-	private int speed;
-	private int torque;
-	private int air_condion_state;
-	private int total_fuel;
+	private double GPS_LAT=0;
+	private double GPS_LONG=0;
+	private double GPS_SPEED=0;
+	private double direction_angle=0;
+	private int instant_fuel=0;
+	private int db_speed=0;
+	private int speed=0;
+	private int torque=0;
+	private int air_condion_state=0;
+	private int total_fuel=0;
 
 	public String getIMEI() {
 		return this.IMEI;
@@ -156,4 +156,19 @@ public class OBDDataChanged {
 	public void setTorque(int torque) {
 		this.torque = torque;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "OBDDataChanged [IMEI=" + IMEI + ", bdoneNo_after_mileage=" + bdoneNo_after_mileage
+				+ ", bdoneNo_zero_mileage=" + bdoneNo_zero_mileage + ", front_oxygen_sensor=" + front_oxygen_sensor
+				+ ", after_oxygen_sensor=" + after_oxygen_sensor + ", GPS_TIME=" + GPS_TIME + ", GPS_STATE=" + GPS_STATE
+				+ ", GPS_LAT=" + GPS_LAT + ", GPS_LONG=" + GPS_LONG + ", GPS_SPEED=" + GPS_SPEED + ", direction_angle="
+				+ direction_angle + ", instant_fuel=" + instant_fuel + ", db_speed=" + db_speed + ", speed=" + speed
+				+ ", torque=" + torque + ", air_condion_state=" + air_condion_state + ", total_fuel=" + total_fuel
+				+ "]";
+	}
+	
 }

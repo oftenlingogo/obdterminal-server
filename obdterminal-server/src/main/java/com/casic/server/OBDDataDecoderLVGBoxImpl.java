@@ -1,22 +1,29 @@
 package com.casic.server;
 
-import com.casic.entity.BDData;
-import com.casic.entity.Message;
-import com.casic.entity.OBDDataChanged;
-import com.casic.entity.ObdPerSecondData;
-import com.casic.entity.ObdTenSecondData;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
 import org.apache.log4j.Logger;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
+import com.casic.entity.BDData;
+import com.casic.entity.Message;
+import com.casic.entity.OBDDataChanged;
+import com.casic.entity.ObdPerSecondData;
+import com.casic.entity.ObdTenSecondData;
+
+/**
+ * @author 王尧
+ *
+ */
 public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 	private static Logger logger = Logger.getLogger(OBDDataDecoderLVGBoxImpl.class);
 	private static Logger logger2 = Logger.getLogger("OBDDataDecoder");
@@ -70,31 +77,31 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 	private OBDDataChanged[] decodeObdData(IoSession session, byte[] data) {
 		OBDDataChanged[] packetChanged = new OBDDataChanged[30];
 		byte[] c = new byte[4];
-		c = byteSplit(data, 0, 4);
-
+		c = byteSplit(data, 0, 4);//截取header
+		logger2.info("待解析数据："+bytes2HexString(data));
 		String header = new String(c);
 		if ((header.equals("flsh")) || (header.equals("scan"))) {
 			try {
 				c = byteSplit(data, 4, 6);
 
-				String terminalId = new String(c);
+				String terminalId = new String(c);//截取miei
 				session.setAttribute("terminalId", terminalId);
-				c = byteSplit(data, 10, 12);
+				c = byteSplit(data, 10, 12);//截取time
 
 				SimpleDateFormat formatTime = new SimpleDateFormat("HHmmssddMMyy");
 				String timeString = new String(c);
 
-				ObdTenSecondData[] obd10data = new ObdTenSecondData[3];
+				ObdTenSecondData[] obd10data = new ObdTenSecondData[3];//截取10s obddata
 				for (int i = 0; i < 3; i++) {
 					obd10data[i] = decodeTenSecondOBDData2(data, i);
 				}
 
-				ObdPerSecondData[] obd1data = new ObdPerSecondData[30];
+				ObdPerSecondData[] obd1data = new ObdPerSecondData[30];//截取1s obddata
 				for (int k = 0; k < 30; k++) {
 					obd1data[k] = decodePerSecondData2(data, k);
 				}
 
-				BDData[] bddata = new BDData[15];
+				BDData[] bddata = new BDData[15];//截取2s GPS
 				for (int j = 0; j < 15; j++) {
 					bddata[j] = decodeBDData2(data, j);
 				}
@@ -130,10 +137,10 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 						packetChanged[i].setDirection_angle(bddata[(i / 2)].getBearing());
 					} else if (i == 0) {
 						packetChanged[i].setGPS_STATE(bddata[0].getBdStatus());
-						packetChanged[i].setGPS_LONG(2.0D * bddata[0].getLongitude() - bddata[1].getLongitude());
-						packetChanged[i].setGPS_LAT(2.0D * bddata[0].getLatitude() - bddata[1].getLatitude());
-						packetChanged[i].setGPS_SPEED(2.0D * bddata[0].getBdspeed() - bddata[1].getBdspeed());
-						packetChanged[i].setDirection_angle(2.0D * bddata[0].getBearing() - bddata[1].getBearing());
+						packetChanged[i].setGPS_LONG((3.0D * bddata[0].getLongitude() - bddata[1].getLongitude())/2.0D);
+						packetChanged[i].setGPS_LAT((3.0D * bddata[0].getLatitude() - bddata[1].getLatitude())/2.0D);
+						packetChanged[i].setGPS_SPEED((3.0D * bddata[0].getBdspeed() - bddata[1].getBdspeed())/2.0D);
+						packetChanged[i].setDirection_angle((2.0D * bddata[0].getBearing() - bddata[1].getBearing())/2.0D);
 					} else {
 						packetChanged[i].setGPS_STATE(bddata[((i - 1) / 2)].getBdStatus());
 						packetChanged[i].setGPS_LONG(
@@ -145,7 +152,8 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 						packetChanged[i].setDirection_angle(
 								(bddata[((i - 1) / 2)].getBearing() + bddata[((i + 1) / 2)].getBearing()) / 2.0D);
 					}
-
+					
+					logger2.info("解析后数据："+packetChanged[i]);
 				}
 
 				int cnt = ((Integer) session.getAttribute("DecodeCount")).intValue();
@@ -206,17 +214,17 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		double ln = (long1 *10000+long2)/1000000.0D;
 		bddata.setLongitude(Double.valueOf(df.format(ln)).doubleValue());
 
-		d = byteSplit(data, 235 + 17 * num + 9, 2);
-		int speed1 = byteArrayToInt(d, 2);
-		d = byteSplit(data, 235 + 17 * num + 11, 2);
-		int speed2 = byteArrayToInt(d, 2);
-		bddata.setBdspeed((speed1 + speed2 / 10.0D) * 1.852D);
+		d = byteSplit(data, 235 + 17 * num + 9, 4);
+		int speed1 = byteArrayToInt(d, 4);
+		//d = byteSplit(data, 235 + 17 * num + 11, 2);
+		//int speed2 = byteArrayToInt(d, 2);
+		bddata.setBdspeed((speed1  / 1000000.0D) );
 
-		d = byteSplit(data, 235 + 17 * num + 13, 2);
-		int bear1 = byteArrayToInt(d, 2);
-		d = byteSplit(data, 235 + 17 * num + 15, 2);
-		int bear2 = byteArrayToInt(d, 2);
-		bddata.setBearing(bear1 + bear2 / 1000.0D);
+		d = byteSplit(data, 235 + 17 * num + 13, 4);
+		//int bear1 = byteArrayToInt(d, 2);
+		//d = byteSplit(data, 235 + 17 * num + 15, 2);
+		int bear2 = byteArrayToInt(d, 4);
+		bddata.setBearing(bear2 / 10000000.0D);
 
 		return bddata;
 	}
@@ -229,9 +237,9 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		d = byteSplit(data, 55 + 6 * num + 2, 1);
 		obddata.setObdspeed(byteArrayToInt(d, 1));
 		d = byteSplit(data, 55 + 6 * num + 3, 2);
-		obddata.setRspeed(byteArrayToInt(d, 2) / 4);
+		obddata.setRspeed(byteArrayToInt(d, 2));//可疑点！！！
 		d = byteSplit(data, 55 + 6 * num + 5, 1);
-		obddata.setTorque(byteArrayToInt(d, 1) * 100 / 255);
+		obddata.setTorque(byteArrayToInt(d, 1));
 		return obddata;
 	}
 
@@ -254,7 +262,10 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		}
 		return byte_3;
 	}
-
+/*
+ * byteArrayToInt 将小端发送的byte[]转换为int
+ * eg: byteArrayToInt(01 02)= (int)0201=2*16+1=33
+ */
 	public int byteArrayToInt(byte[] b, int num) {
 		int value = 0;
 		for (int i = 0; i < num; i++) {

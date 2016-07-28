@@ -60,11 +60,11 @@ public class SaveDataThreadNew implements Runnable {
 		if (data[0].getGPS_TIME().getSeconds() < 30) {
 			this.pathIn = (this.filePath + "/" + fT.format(data[0].getGPS_TIME()) + "/"
 					+ fT1.format(data[0].getGPS_TIME()) + "/" + fT2.format(data[0].getGPS_TIME()) + "00/");
-			System.out.println(this.pathIn);
+			
 		} else {
 			this.pathIn = (this.filePath + "/" + fT.format(data[0].getGPS_TIME()) + "/"
 					+ fT1.format(data[0].getGPS_TIME()) + "/" + fT2.format(data[0].getGPS_TIME()) + "30/");
-			System.out.println(this.pathIn);
+			
 		}
 
 		String filename = this.pathIn + data[0].getIMEI() + "_" + formatDate.format(data[0].getGPS_TIME()) + ".txt";
