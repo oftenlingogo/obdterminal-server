@@ -26,7 +26,6 @@ import com.casic.entity.ObdTenSecondData;
  */
 public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 	private static Logger logger = Logger.getLogger(OBDDataDecoderLVGBoxImpl.class);
-	private static Logger logger2 = Logger.getLogger("OBDDataDecoder");
 	private static final int PACKAGE_LENGTH = 490;
 	private SimpleDateFormat formatTime = new SimpleDateFormat("HHmmssddMMyy");
 	protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
@@ -79,7 +78,7 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		OBDDataChanged[] packetChanged = new OBDDataChanged[30];
 		byte[] c = new byte[4];
 		c = byteSplit(data, 0, 4);//截取header
-		logger2.debug("待解析数据："+bytes2HexString(data));
+		logger.debug("待解析数据："+bytes2HexString(data));
 		String header = new String(c);
 		if ((header.equals("flsh")) || (header.equals("scan"))) {
 			try {
@@ -151,22 +150,22 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 								(bddata[((i - 1) / 2)].getBearing() + bddata[((i + 1) / 2)].getBearing()) / 2.0D);
 					}
 					
-					logger2.debug("解析后数据："+packetChanged[i]);
+					logger.debug("解析后数据："+packetChanged[i]);
 				}
 
 				int cnt = ((Integer) session.getAttribute("DecodeCount")).intValue();
 				cnt++;
 				session.setAttribute("DecodeCount", Integer.valueOf(cnt));
-				logger2.info(" ++++ 成功解析了第 " + cnt + " 条数据，终端编号：" + terminalId + " ++++");
+				logger.info(" ++++ 成功解析了第 " + cnt + " 条数据，终端编号：" + terminalId + " ++++");
 			} catch (Exception ex) {
 				String terminalId = session.getAttribute("terminalId").toString();
-				logger2.info(" ---- 无法解析正常数据包（包头正确），终端编号：" + terminalId + " ----");
-				logger2.info("数据包原始数据：" + bytes2HexString(data));
+				logger.info(" ---- 无法解析正常数据包（包头正确），终端编号：" + terminalId + " ----");
+				logger.info("数据包原始数据：" + bytes2HexString(data));
 				packetChanged = (OBDDataChanged[]) null;
 			}
 		} else {
-			logger2.info(" ---- 无法解析异常数据包（包头错误）----");
-			logger2.info(bytes2HexString(data));
+			logger.info(" ---- 无法解析异常数据包（包头错误）----");
+			logger.info(bytes2HexString(data));
 			packetChanged = (OBDDataChanged[]) null;
 		}
 		return packetChanged;
@@ -215,7 +214,7 @@ public class OBDDataDecoderLVGBoxImpl extends CumulativeProtocolDecoder {
 		int speed1 = byteArrayToInt(d, 2);
 		d = byteSplit(data, 235 + 17 * num + 11, 2);
 		int speed2 = byteArrayToInt(d, 2);
-		bddata.setBdspeed((speed1 *1000+speed2) / 1000.0D);
+		bddata.setBdspeed((speed1 *1000+speed2) / 1000.0D*1.852);
 
 		d = byteSplit(data, 235 + 17 * num + 13, 2);
 		int bear1 = byteArrayToInt(d, 2);
