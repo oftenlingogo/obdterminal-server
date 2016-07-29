@@ -7,7 +7,7 @@ import net.sf.json.JsonConfig;
 import net.sf.json.processors.JsonValueProcessor;
 
 public class JsonDateValueProcessor implements JsonValueProcessor {
-	// 制造冲突
+	// 代码合并
 	private String datePattern = "yyyy-MM-dd HH:mm:ss";
 
 	public JsonDateValueProcessor() {
